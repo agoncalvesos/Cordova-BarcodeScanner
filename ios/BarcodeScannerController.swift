@@ -7,7 +7,7 @@ class BarcodeScannerController : UIViewController, AVCaptureMetadataOutputObject
     @IBOutlet var messageLabel:UILabel!
     @IBOutlet weak var cancelImageButton: UIButton!
     @IBOutlet weak var flashImageButton: UIButton!
-    var showGuide:String = ""
+    var showGuide:Bool = true
     var pluginOrientation:String = ""
     var originalOrientation:UIInterfaceOrientation?
     var callbackId:String?
@@ -47,7 +47,7 @@ class BarcodeScannerController : UIViewController, AVCaptureMetadataOutputObject
         return false
     }
     
-    convenience init(orientation:String, showguide:String, camera:String, flash:String, callback:String, parent:CDVPlugin) {
+    convenience init(orientation:String, showguide:Bool, camera:String, flash:String, callback:String, parent:CDVPlugin) {
         self.init(nibName:nil, bundle:nil)
         
         pluginOrientation = orientation
@@ -166,7 +166,7 @@ class BarcodeScannerController : UIViewController, AVCaptureMetadataOutputObject
                 view.bringSubview(toFront:qrCodeFrameView)
             }
             
-            if(showGuide == "on" || showGuide == "auto") {
+            if(showGuide) {
                 lineMidLeft = UILabel(frame: CGRect(
                     x:view.bounds.size.width / 7,
                     y:(view.bounds.size.height / 2) - (view.bounds.size.height / 8),

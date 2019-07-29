@@ -12,7 +12,7 @@ import UIKit
         let camera:String = params.object(forKey: "camera") as? String ?? "";
         let flash:String = params.object(forKey: "flash") as? String ?? "";
         let orientation:String = params.object(forKey: "orientation") as? String ?? "";
-        let drawSight:String = params.object(forKey: "drawSight") as? String ?? "on";
+        let drawSight:Bool = params.object(forKey: "drawSight") as? Bool ?? true;
         
         let scannerController:BarcodeScannerController = BarcodeScannerController(
             orientation:orientation,
