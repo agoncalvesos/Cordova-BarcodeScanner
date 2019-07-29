@@ -302,6 +302,8 @@ implements SurfaceHolder.Callback {
     }
     public void onConfigurationChanged(Configuration newConfig)
     {
+        if (camera == null) return;
+
         super.onConfigurationChanged(newConfig);
         int rotation = getWindowManager().getDefaultDisplay().getRotation();
         switch(rotation)
@@ -334,7 +336,9 @@ implements SurfaceHolder.Callback {
     }
 
     public void toggleFlash(View view) {
-		camera.startPreview();
+        if(camera == null) return;
+
+        camera.startPreview();
         android.hardware.Camera.Parameters camParams = camera.getParameters();
         //If the flash is set to off
         try {
@@ -403,15 +407,20 @@ implements SurfaceHolder.Callback {
             barcode.setData(data);
 
             if (scanner.scanImage(barcode) != 0) {
-                String qrValue = "";
+                Symbol symbol = null;
 
                 SymbolSet syms = scanner.getResults();
                 for (Symbol sym : syms) {
-                    qrValue = sym.getData();
-
                     // Return 1st found QR code value to the calling Activity.
+                    if(sym.getType() > Symbol.PARTIAL){
+                        symbol = sym;
+                        break;
+                    }
+                }
+
+                if(symbol != null){
                     Intent result = new Intent ();
-                    result.putExtra(EXTRA_QRVALUE, qrValue);
+                    result.putExtra(EXTRA_QRVALUE, symbol.getData());
                     setResult(Activity.RESULT_OK, result);
                     finish();
                 }

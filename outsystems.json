@@ -1,0 +1,11 @@
+{
+    "plugin": {
+        "url": "https://github.com/OutSystems/csZBar.git#v1.3.3-OS6",
+        "variables": [
+            {
+                "name": "CAMERA_USAGE_DESCRIPTION",
+                "value": "We access your camera to scan barcodes."
+            }
+        ]
+    }
+}
