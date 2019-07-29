@@ -324,12 +324,12 @@ class BarcodeScannerController : UIViewController, AVCaptureMetadataOutputObject
             qrCodeFrameView?.frame = barCodeObject!.bounds
             
             //Get the barcode value and type
-            var barcodeReturn = [AnyHashable: Any]();
-            barcodeReturn["data"] = metadataObj.stringValue;
-            barcodeReturn["format"] = metadataObj.type;
+            //var barcodeReturn = [AnyHashable: Any]();
+            //barcodeReturn["data"] = metadataObj.stringValue;
+            //barcodeReturn["format"] = metadataObj.type;
             
             //Prepare the result and make the callback
-            parentPlugin?.commandDelegate!.send(CDVPluginResult(status:CDVCommandStatus_OK, messageAs: barcodeReturn), callbackId: callbackId)
+            parentPlugin?.commandDelegate!.send(CDVPluginResult(status:CDVCommandStatus_OK, messageAs: metadataObj.stringValue), callbackId: callbackId)
             
             cleanupScreen()
         }
