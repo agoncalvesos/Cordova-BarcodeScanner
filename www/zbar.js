@@ -7,8 +7,6 @@ ZBar.prototype = {
 
     scan: function (params, success, failure)
     {
-        console.log("scan2!")
-        console.log("params1", params);
         argscheck.checkArgs('*fF', 'CsZBar.scan', arguments);
 
         params = params || {};
@@ -18,10 +16,6 @@ ZBar.prototype = {
         if(params.flash != "on" && params.flash != "off") params.flash = "auto";
         // iOS only: The locked orientation to show the scanner in. Can be: "portrait", "landscapeLeft", "landscapeRight", "portraitUpsideDown".
         if(params.orientation == "") params.orientation = "auto";
-        // defaults to true, create a red sight/line in the center of the scanner view.
-        if(params.drawSight != "on" && params.drawSight != "off") params.drawSight = "auto";
-
-        console.log("params2", params);
 
         exec(success, failure, 'CsZBar', 'scan', [params]);
     },
