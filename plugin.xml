@@ -18,7 +18,99 @@
     </js-module>
 
     <platform name="android">
-        <config-file target="res/xml/config.xml" parent="/*">
+    <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="CsZBar">
+                <param name="android-package" value="com.dealrinc.gmvScanner.CDVAndroidScanner"/>
+            </feature>
+        </config-file>
+
+        <config-file parent="/*" target="app/src/main/AndroidManifest.xml">
+            <uses-permission android:name="android.permission.CAMERA" />
+        </config-file>
+        <config-file parent="application" target="app/src/main/AndroidManifest.xml">
+            <meta-data
+                    android:name="com.google.android.gms.version"
+                    android:value="@integer/google_play_services_version" />
+            <meta-data
+                    android:name="com.google.android.gms.vision.DEPENDENCIES"
+                    android:value="barcode" />
+
+            <activity android:label="@string/title_activity_main" android:name="com.dealrinc.gmvScanner.SecondaryActivity"/>
+            <activity android:label="Read Barcode" android:name="com.dealrinc.gmvScanner.BarcodeCaptureActivity" android:theme="@style/Theme.AppCompat.Light"/>
+        </config-file>
+
+        <config-file parent="/*" target="AndroidManifest.xml">
+            <uses-permission android:name="android.permission.CAMERA" />
+        </config-file>
+        <config-file parent="application" target="AndroidManifest.xml">
+            <meta-data
+                    android:name="com.google.android.gms.version"
+                    android:value="@integer/google_play_services_version" />
+            <meta-data
+                    android:name="com.google.android.gms.vision.DEPENDENCIES"
+                    android:value="barcode" />
+
+            <activity android:label="@string/title_activity_main" android:name="com.dealrinc.gmvScanner.SecondaryActivity"/>
+            <activity android:label="Read Barcode" android:name="com.dealrinc.gmvScanner.BarcodeCaptureActivity" android:theme="@style/Theme.AppCompat.Light"/>
+        </config-file>
+
+        <config-file target="res/values/strings.xml" parent="/*">
+            <string name="ok">OK</string>
+            <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
+            <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
+            <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
+            <string name="title_activity_main">Barcode Reader Activity</string>
+            <string name="barcode_header">Click &quot;Read Barcode&quot; to read a barcode</string>
+            <string name="read_barcode">Read Barcode</string>
+            <string name="auto_focus">Auto Focus</string>
+            <string name="use_flash">Use Flash</string>
+            <string name="barcode_success">Barcode read successfully</string>
+            <string name="barcode_failure">No barcode captured</string>
+            <string name="barcode_error">"Error reading barcode: %1$s"</string>
+        </config-file>
+
+        <source-file src="android/src/gmvScanner/BarcodeCaptureActivity.java"
+                     target-dir="src/com/dealrinc/gmvScanner"/>
+        <source-file src="android/src/gmvScanner/BarcodeGraphic.java"
+                     target-dir="src/com/dealrinc/gmvScanner"/>
+        <source-file src="android/src/gmvScanner/BarcodeGraphicTracker.java"
+                     target-dir="src/com/dealrinc/gmvScanner"/>
+        <source-file src="android/src/gmvScanner/BarcodeTrackerFactory.java"
+                     target-dir="src/com/dealrinc/gmvScanner"/>
+        <source-file src="android/src/gmvScanner/CDVAndroidScanner.java"
+                     target-dir="src/com/dealrinc/gmvScanner"/>
+        <source-file src="android/src/gmvScanner/SecondaryActivity.java"
+                     target-dir="src/com/dealrinc/gmvScanner"/>
+
+        <source-file src="android/src/gmvScanner/ui/camera/CameraSource.java"
+                     target-dir="src/com/dealrinc/gmvScanner/ui/camera"/>
+        <source-file src="android/src/gmvScanner/ui/camera/CameraSourcePreview.java"
+                     target-dir="src/com/dealrinc/gmvScanner/ui/camera"/>
+        <source-file src="android/src/gmvScanner/ui/camera/GraphicOverlay.java"
+                     target-dir="src/com/dealrinc/gmvScanner/ui/camera"/>
+
+        <resource-file src="android/res/layout/activity_main.xml"
+                       target="res/layout/activity_gmv_barcode_scanner.xml"/>
+        <resource-file src="android/res/layout/barcode_capture.xml"
+                       target="res/layout/barcode_capture.xml"/>
+
+        <resource-file src="android/res/drawable/flashlight.png"
+                       target="res/drawable/flashlight.png"/>
+        <resource-file src="android/res/drawable/rounded_rectangle.xml"
+                       target="res/drawable/rounded_rectangle.xml"/>
+        <resource-file src="android/res/drawable/torch_active.xml"
+                       target="res/drawable/torch_active.xml"/>
+        <resource-file src="android/res/drawable/torch_inactive.xml"
+                       target="res/drawable/torch_inactive.xml"/>
+
+
+        <framework src="com.android.support:support-v4:27.1.0" />
+        <framework src="com.google.android.gms:play-services-vision:11.0.1" />
+        <framework src="com.android.support:design:27.1.0" />
+            
+        <framework src="android/build-extras.gradle" custom="true" type="gradleReference"/>
+
+        <!-- <config-file target="res/xml/config.xml" parent="/*">
             <feature name="CsZBar">
                 <param name="android-package" value="org.cloudsky.cordovaPlugins.ZBar"/>
             </feature>
@@ -62,7 +154,7 @@
         <source-file src="android/res/drawable/camera_flash.png" target-dir="res/drawable-ldpi"/>
         <source-file src="android/res/drawable/camera_flash.png" target-dir="res/drawable-mdpi"/>
         <source-file src="android/res/drawable/camera_flash.png" target-dir="res/drawable-xhdpi"/>
-        <source-file src="android/res/drawable/camera_flash.png" target-dir="res/drawable-xxhdpi"/>
+        <source-file src="android/res/drawable/camera_flash.png" target-dir="res/drawable-xxhdpi"/> -->
     </platform>
 
     <platform name="ios">
@@ -73,7 +165,7 @@
         </config-file>
         
         <dependency url="https://github.com/agoncalvesos/cordova-plugin-add-swift-support" commit="513e43f94ae94ad609d49f24e7dca23a4c358095" id="cordova-plugin-add-swift-support"/>
-        
+
         <!-- Declare Camera Usage for iOS10+ -->
         <preference name="CAMERA_USAGE_DESCRIPTION" default="We access your camera to scan barcodes." />
         <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
