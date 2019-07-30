@@ -73,11 +73,11 @@ public class CDVAndroidScanner extends CordovaPlugin {
                 Intent d = new Intent();
                 if (data != null) {
                     Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-                    JSONArray result = new JSONArray();
+                    /*JSONArray result = new JSONArray();
                     result.put(barcode.rawValue);
                     result.put("");
-                    result.put("");
-                    mCallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
+                    result.put("");*/
+                    mCallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, barcode.rawValue));
 
                     Log.d("CDVAndroidScanner", "Barcode read: " + barcode.displayValue);
                 }
