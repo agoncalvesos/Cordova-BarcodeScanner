@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Build;
@@ -34,16 +35,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 import android.view.WindowManager;
-import android.view.Display;
-import android.graphics.Point;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -51,10 +47,9 @@ import com.dealrinc.gmvScanner.ui.camera.CameraSource;
 import com.dealrinc.gmvScanner.ui.camera.CameraSourcePreview;
 
 import com.dealrinc.gmvScanner.ui.camera.GraphicOverlay;
-import com.google.android.gms.vision.MultiProcessor;
+import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.google.android.gms.common.images.Size;
 
 import java.io.IOException;
 
@@ -74,8 +69,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     // constants used to pass extra data in the intent
     public Integer DetectionTypes;
-    public double ViewFinderWidth = .5;
-    public double ViewFinderHeight = .7;
+    public double ViewFinderWidth = .8;
+    public double ViewFinderHeight = .5;
 
     public static final String BarcodeObject = "Barcode";
 
@@ -85,7 +80,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     // helper objects for detecting taps and pinches.
     private ScaleGestureDetector scaleGestureDetector;
-    private GestureDetector gestureDetector;
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -94,6 +88,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        //prevent screen rotation
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         // Hide the status bar and action bar.
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -133,7 +129,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             requestCameraPermission();
         }
 
-        gestureDetector = new GestureDetector(this, new CaptureGestureListener());
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
     }
 
@@ -174,9 +169,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     public boolean onTouchEvent(MotionEvent e) {
         boolean b = scaleGestureDetector.onTouchEvent(e);
 
-        boolean c = gestureDetector.onTouchEvent(e);
-
-        return b || c || super.onTouchEvent(e);
+        return b || super.onTouchEvent(e);
     }
 
     /**
@@ -207,10 +200,14 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         // is set to receive the barcode detection results, track the barcodes, and maintain
         // graphics for each barcode on screen.  The factory is used by the multi-processor to
         // create a separate tracker instance for each barcode.
-        BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context).setBarcodeFormats(detectionType).build();
-        BarcodeTrackerFactory barcodeFactory = new BarcodeTrackerFactory(mGraphicOverlay, this);
-        barcodeDetector.setProcessor(
-                new MultiProcessor.Builder<>(barcodeFactory).build());
+        BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context)
+                                                             .setBarcodeFormats(detectionType)
+                                                             .build();
+
+
+        BarcodeGraphic graphic = new BarcodeGraphic(mGraphicOverlay);
+        Tracker<Barcode> tracker = new BarcodeGraphicTracker(mGraphicOverlay, graphic, this);
+        barcodeDetector.setProcessor(new CentralBarcodeFocusingProcessor(barcodeDetector, tracker, mPreview));
 
         if (!barcodeDetector.isOperational()) {
             // Note: The first time that an app using the barcode or face API is installed on a
@@ -235,19 +232,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             }
         }
 
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
-        int height = size.y;
-
-        // Creates and starts the camera.  Note that this uses a higher resolution in comparison
-        // to other detection examples to enable the barcode detector to detect small barcodes
-        // at long distances.
+        // Creates and starts the camera.
         CameraSource.Builder builder = new CameraSource.Builder(getApplicationContext(), barcodeDetector)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setRequestedPreviewSize(1600, 1024)
-                .setRequestedFps(15.0f);
+                .setFacing(CameraSource.CAMERA_FACING_BACK);//vey: change camera here
 
         // make sure that auto focus is an available option
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -259,6 +246,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 .setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : null)
                 .build();
     }
+
+
 
     /**
      * Restarts the camera.
@@ -371,58 +360,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         }
     }
 
-    /**
-     * onTap returns the tapped barcode result to the calling Activity.
-     *
-     * @param rawX - the raw position of the tap
-     * @param rawY - the raw position of the tap.
-     * @return true if the activity is ending.
-     */
-    private boolean onTap(float rawX, float rawY) {
-        // Find tap point in preview frame coordinates.
-        return false;
-        /*
-        int[] location = new int[2];
-        mGraphicOverlay.getLocationOnScreen(location);
-        float x = (rawX - location[0]) / mGraphicOverlay.getWidthScaleFactor();
-        float y = (rawY - location[1]) / mGraphicOverlay.getHeightScaleFactor();
-
-        // Find the barcode whose center is closest to the tapped point.
-        Barcode best = null;
-        float bestDistance = Float.MAX_VALUE;
-        for (BarcodeGraphic graphic : mGraphicOverlay.getGraphics()) {
-            Barcode barcode = graphic.getBarcode();
-            if (barcode.getBoundingBox().contains((int) x, (int) y)) {
-                // Exact hit, no need to keep looking.
-                best = barcode;
-                break;
-            }
-            float dx = x - barcode.getBoundingBox().centerX();
-            float dy = y - barcode.getBoundingBox().centerY();
-            float distance = (dx * dx) + (dy * dy);  // actually squared distance
-            if (distance < bestDistance) {
-                best = barcode;
-                bestDistance = distance;
-            }
-        }
-
-        if (best != null) {
-            Intent data = new Intent();
-            data.putExtra(BarcodeObject, best);
-            setResult(CommonStatusCodes.SUCCESS, data);
-            finish();
-            return true;
-        }
-        return false;*/
-    }
-
-    private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent e) {
-            return onTap(e.getRawX(), e.getRawY()) || super.onSingleTapConfirmed(e);
-        }
-    }
-
     private class ScaleListener implements ScaleGestureDetector.OnScaleGestureListener {
 
         /**
@@ -498,7 +435,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     @Override
     public void onBarcodeDetected(Barcode barcode) {
-        //do something with barcode data returned
 
         if(DetectionTypes == 0) {
             String val = barcode.rawValue;
@@ -508,7 +444,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             val = val.replaceAll("[ioqIOQ]", "");
 
             val = val.substring(0, Math.min(val.length(), 17));
-            
+
             barcode.rawValue = val;
 
             if(validateVin(val)) {
@@ -524,6 +460,5 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             setResult(CommonStatusCodes.SUCCESS, data);
             finish();
         }
-
     }
 }

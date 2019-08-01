@@ -18,7 +18,7 @@ package com.dealrinc.gmvScanner.ui.camera;
 import android.Manifest;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Color;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.support.annotation.RequiresPermission;
 import android.util.AttributeSet;
@@ -28,7 +28,6 @@ import android.view.SurfaceView;
 import android.view.ViewGroup;
 import android.view.View;
 import android.widget.Button;
-import android.os.Build;
 
 import com.google.android.gms.common.images.Size;
 
@@ -36,7 +35,6 @@ import java.io.IOException;
 
 public class CameraSourcePreview extends ViewGroup {
     private static final String TAG = "CameraSourcePreview";
-
     private Context mContext;
     private SurfaceView mSurfaceView;
     private View mViewFinderView;
@@ -47,7 +45,7 @@ public class CameraSourcePreview extends ViewGroup {
     private boolean mFlashState = false;
 
     public double ViewFinderWidth = .5;
-    public double ViewFinderHeight = .7;
+    public double ViewFinderHeight = .8;
 
     private GraphicOverlay mOverlay;
 
@@ -63,12 +61,10 @@ public class CameraSourcePreview extends ViewGroup {
 
         mViewFinderView = new View(mContext);
         mViewFinderView.setBackgroundResource(getResources().getIdentifier("rounded_rectangle", "drawable", mContext.getPackageName()));
-        mViewFinderView.layout(0,0, 500, 500);
         addView(mViewFinderView);
 
         mTorchButton = new Button(mContext);
         mTorchButton.setBackgroundResource(getResources().getIdentifier("torch_inactive", "drawable", mContext.getPackageName()));
-        mTorchButton.layout(0,0, dpToPx(45),dpToPx(45));
         mTorchButton.setMaxWidth(50);
         mTorchButton.setRotation(90);
 
@@ -216,13 +212,14 @@ public class CameraSourcePreview extends ViewGroup {
         int actualWidth = (int) (layoutWidth*ViewFinderWidth);
         int actualHeight = (int) (layoutHeight*ViewFinderHeight);
 
-        mViewFinderView.layout(layoutWidth/2 -actualWidth/2,layoutHeight/2 - actualHeight/2, layoutWidth/2 + actualWidth/2, layoutHeight/2 + actualHeight/2);
+        mViewFinderView.layout(layoutWidth/2 - actualWidth/2,layoutHeight/2 - actualHeight/2, layoutWidth/2 + actualWidth/2, layoutHeight/2 + actualHeight/2);
 
         int buttonSize = dpToPx(45);
-        int torchLeft = (int) layoutWidth/2 + actualWidth/2 + (layoutWidth - (layoutWidth/2 + actualWidth/2))/2 - buttonSize/2;
-        int torchTop = layoutHeight - (layoutWidth-torchLeft);
+        int margin = 30;
 
-        mTorchButton.layout(torchLeft, torchTop, torchLeft + buttonSize, torchTop + buttonSize);
+        int torchLeft = layoutWidth - buttonSize - margin;
+        int torchTop = layoutHeight - buttonSize - margin;
+        mTorchButton.layout(torchLeft, torchTop, torchLeft + buttonSize, torchTop +  buttonSize);
 
         try {
             startIfReady();
@@ -245,4 +242,12 @@ public class CameraSourcePreview extends ViewGroup {
         Log.d(TAG, "isPortraitMode returning false by default");
         return false;
     }
+
+    public Rect getRect(){
+        int[] l = new int[2];
+        mViewFinderView.getLocationOnScreen(l);
+        Rect rect = new Rect(l[0], l[1], l[0] + mViewFinderView.getWidth(), l[1] + mViewFinderView.getHeight());
+        return rect;
+    }
+
 }

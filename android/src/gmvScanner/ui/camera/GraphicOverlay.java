@@ -17,6 +17,8 @@ package com.dealrinc.gmvScanner.ui.camera;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -198,9 +200,12 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        setBackgroundColor(Color.CYAN);
+
         synchronized (mLock) {
             if ((mPreviewWidth != 0) && (mPreviewHeight != 0)) {
-                mWidthScaleFactor = (float) canvas.getWidth() / (float) mPreviewWidth;
+                mWidthScaleFactor = (float) canvas.getWidth() / (float) mPreviewWidth
+                ;
                 mHeightScaleFactor = (float) canvas.getHeight() / (float) mPreviewHeight;
             }
 

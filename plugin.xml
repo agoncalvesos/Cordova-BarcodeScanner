@@ -75,7 +75,7 @@
                      target-dir="src/com/dealrinc/gmvScanner"/>
         <source-file src="android/src/gmvScanner/BarcodeGraphicTracker.java"
                      target-dir="src/com/dealrinc/gmvScanner"/>
-        <source-file src="android/src/gmvScanner/BarcodeTrackerFactory.java"
+        <source-file src="android/src/gmvScanner/CentralBarcodeFocusingProcessor.java"
                      target-dir="src/com/dealrinc/gmvScanner"/>
         <source-file src="android/src/gmvScanner/CDVAndroidScanner.java"
                      target-dir="src/com/dealrinc/gmvScanner"/>

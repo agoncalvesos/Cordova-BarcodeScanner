@@ -83,11 +83,11 @@ public class CDVAndroidScanner extends CordovaPlugin {
                 }
             } else {
                 String err = data.getParcelableExtra("err");
-                JSONArray result = new JSONArray();
+                /*JSONArray result = new JSONArray();
                 result.put(err);
                 result.put("");
-                result.put("");
-                mCallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, result));
+                result.put("");*/
+                mCallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, err));
             }
         }
     }
