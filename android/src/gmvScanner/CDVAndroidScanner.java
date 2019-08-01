@@ -54,7 +54,7 @@ public class CDVAndroidScanner extends CordovaPlugin {
     }
 
     private void openNewActivity(Context context, JSONArray args) {
-		Intent intent = new Intent(context, SecondaryActivity.class);
+		Intent intent = new Intent(context, BarcodeCaptureActivity.class);
         intent.putExtra("DetectionTypes", args.optInt(0, 1234));
         intent.putExtra("ViewFinderWidth", args.optDouble(1, .5));
         intent.putExtra("ViewFinderHeight", args.optDouble(1, .7));

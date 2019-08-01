@@ -79,8 +79,6 @@
                      target-dir="src/com/dealrinc/gmvScanner"/>
         <source-file src="android/src/gmvScanner/CDVAndroidScanner.java"
                      target-dir="src/com/dealrinc/gmvScanner"/>
-        <source-file src="android/src/gmvScanner/SecondaryActivity.java"
-                     target-dir="src/com/dealrinc/gmvScanner"/>
 
         <source-file src="android/src/gmvScanner/ui/camera/CameraSource.java"
                      target-dir="src/com/dealrinc/gmvScanner/ui/camera"/>
@@ -89,8 +87,6 @@
         <source-file src="android/src/gmvScanner/ui/camera/GraphicOverlay.java"
                      target-dir="src/com/dealrinc/gmvScanner/ui/camera"/>
 
-        <resource-file src="android/res/layout/activity_main.xml"
-                       target="res/layout/activity_gmv_barcode_scanner.xml"/>
         <resource-file src="android/res/layout/barcode_capture.xml"
                        target="res/layout/barcode_capture.xml"/>
 
