@@ -42,7 +42,6 @@ public class CameraSourcePreview extends ViewGroup {
     private boolean mStartRequested;
     private boolean mSurfaceAvailable;
     private CameraSource mCameraSource;
-    private boolean mFlashState = false;
 
     public double ViewFinderWidth = .5;
     public double ViewFinderHeight = .8;
@@ -64,7 +63,6 @@ public class CameraSourcePreview extends ViewGroup {
         addView(mViewFinderView);
 
         mTorchButton = new Button(mContext);
-        mTorchButton.setBackgroundResource(getResources().getIdentifier("torch_inactive", "drawable", mContext.getPackageName()));
         mTorchButton.setMaxWidth(50);
         mTorchButton.setRotation(90);
 
@@ -72,9 +70,8 @@ public class CameraSourcePreview extends ViewGroup {
             @Override
             public void onClick(View v) {
                 try {
-                        mCameraSource.setFlashMode(!mFlashState?Camera.Parameters.FLASH_MODE_TORCH :Camera.Parameters.FLASH_MODE_OFF);
-                        mFlashState = !mFlashState;
-                        mTorchButton.setBackgroundResource(getResources().getIdentifier(mFlashState ? "torch_active" : "torch_inactive", "drawable", mContext.getPackageName()));
+                    mCameraSource.setFlashMode(mCameraSource.getFlashMode() == Camera.Parameters.FLASH_MODE_OFF ? Camera.Parameters.FLASH_MODE_TORCH :Camera.Parameters.FLASH_MODE_OFF);
+                    mTorchButton.setBackgroundResource(getResources().getIdentifier(mCameraSource.getFlashMode() ==  Camera.Parameters.FLASH_MODE_TORCH ? "torch_active" : "torch_inactive", "drawable", mContext.getPackageName()));
                 } catch(Exception e) {
 
                 }
@@ -97,6 +94,12 @@ public class CameraSourcePreview extends ViewGroup {
         }
 
         mCameraSource = cameraSource;
+
+        if (mCameraSource.getFlashMode() == Camera.Parameters.FLASH_MODE_TORCH){
+            mTorchButton.setBackgroundResource(getResources().getIdentifier("torch_active", "drawable", mContext.getPackageName()));
+        } else {
+            mTorchButton.setBackgroundResource(getResources().getIdentifier("torch_inactive", "drawable", mContext.getPackageName()));
+        }
 
         if (mCameraSource != null) {
             mStartRequested = true;

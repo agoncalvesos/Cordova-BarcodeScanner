@@ -51,6 +51,9 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 /**
@@ -68,7 +71,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
     // constants used to pass extra data in the intent
-    public Integer DetectionTypes;
+    public Integer DetectionTypes = 1234;
     public double ViewFinderWidth = .8;
     public double ViewFinderHeight = .5;
 
@@ -80,6 +83,12 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     // helper objects for detecting taps and pinches.
     private ScaleGestureDetector scaleGestureDetector;
+
+    public static final String EXTRA_PARAMS = "params";
+
+    // Customisable stuff
+    String whichCamera;
+    String flashMode;
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -113,18 +122,13 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         mPreview.ViewFinderWidth = ViewFinderWidth;
         mPreview.ViewFinderHeight = ViewFinderHeight;
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(getResources().getIdentifier("graphicOverlay", "id", getPackageName()));
-
-
-        // read parameters from the intent used to launch the activity.
-        DetectionTypes = getIntent().getIntExtra("DetectionTypes", 1234);
-        ViewFinderWidth = getIntent().getDoubleExtra("ViewFinderWidth", .5);
-        ViewFinderHeight = getIntent().getDoubleExtra("ViewFinderHeight", .7);
+        
 
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED) {
-            createCameraSource(true, false);
+            createCameraSource(true);
         } else {
             requestCameraPermission();
         }
@@ -181,7 +185,20 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
      * the constant.
      */
     @SuppressLint("InlinedApi")
-    private void createCameraSource(boolean autoFocus, boolean useFlash) {
+    private void createCameraSource(boolean autoFocus) {
+
+        // Get parameters from JS
+        Intent startIntent = getIntent();
+        String paramStr = startIntent.getStringExtra(EXTRA_PARAMS);
+        JSONObject params;
+        try { params = new JSONObject(paramStr); }
+        catch (JSONException e) { params = new JSONObject(); }
+        String textTitle = params.optString("text_title");
+        String textInstructions = params.optString("text_instructions");
+        Boolean drawSight = params.optBoolean("drawSight", true);
+        whichCamera = params.optString("camera");
+        flashMode = params.optString("flash");
+
         Context context = getApplicationContext();
 
 
@@ -232,9 +249,11 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             }
         }
 
-        // Creates and starts the camera.
+        // Creates and starts the camera, set which camera to use and set flash/torch mode
+        PackageManager pm = context.getPackageManager();
         CameraSource.Builder builder = new CameraSource.Builder(getApplicationContext(), barcodeDetector)
-                .setFacing(CameraSource.CAMERA_FACING_BACK);//vey: change camera here
+                .setFacing(whichCamera.equals("front") && pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT)? CameraSource.CAMERA_FACING_FRONT: CameraSource.CAMERA_FACING_BACK)
+                .setFlashMode(flashMode.equals("on") ? Camera.Parameters.FLASH_MODE_TORCH : null);
 
         // make sure that auto focus is an available option
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -242,9 +261,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                     autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null);
         }
 
-        mCameraSource = builder
-                .setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : null)
-                .build();
+        mCameraSource = builder.build();
     }
 
 
@@ -314,7 +331,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             ViewFinderWidth = getIntent().getDoubleExtra("ViewFinderWidth", .5);
             ViewFinderHeight = getIntent().getDoubleExtra("ViewFinderHeight", .7);
 
-            createCameraSource(true, false);
+            createCameraSource(true);
             return;
         }
 

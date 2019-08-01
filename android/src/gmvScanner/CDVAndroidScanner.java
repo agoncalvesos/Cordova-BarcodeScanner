@@ -8,6 +8,7 @@ import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +28,7 @@ public class CDVAndroidScanner extends CordovaPlugin {
     protected CallbackContext mCallbackContext;
 
     private static final int RC_BARCODE_CAPTURE = 9001;
-
+    public static final String EXTRA_PARAMS = "params";
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
     }
@@ -55,9 +56,11 @@ public class CDVAndroidScanner extends CordovaPlugin {
 
     private void openNewActivity(Context context, JSONArray args) {
 		Intent intent = new Intent(context, BarcodeCaptureActivity.class);
-        intent.putExtra("DetectionTypes", args.optInt(0, 1234));
-        intent.putExtra("ViewFinderWidth", args.optDouble(1, .5));
-        intent.putExtra("ViewFinderHeight", args.optDouble(1, .7));
+        JSONObject params = args.optJSONObject(0);
+        intent.putExtra(BarcodeCaptureActivity.EXTRA_PARAMS, params.toString());
+        //intent.putExtra("DetectionTypes", args.optInt(0, 1234));
+        //intent.putExtra("ViewFinderWidth", args.optDouble(1, .5));
+        //intent.putExtra("ViewFinderHeight", args.optDouble(1, .7));
 
         this.cordova.setActivityResultCallback(this);
         this.cordova.startActivityForResult(this, intent, RC_BARCODE_CAPTURE);
